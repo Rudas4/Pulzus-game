@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulzus-lufi vadászat - 2026</title>
+    <style>
+        :root {
+            --magenta: #E20074;
+            --magenta-dark: #b0005a;
+            --magenta-light: #ff2d8f;
+            --gold: #FFD700;
+            --gold-dark: #c5a600;
+            --black-balloon: #1a1a1a;
+            --text-light: #ffffff;
+            --text-dark: #1a1a1a;
+            --overlay-bg: rgba(0, 0, 0, 0.65);
+            --panel-bg: rgba(20, 20, 40, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            background: #0a0a0a;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        /* ==================== KÉPERNYŐK ==================== */
+        .screen {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        /* Kezdő oldal */
+        #startScreen {
+            background-image: url('background1.jpg');
+            background-color: #1a1a2e;
+            background-size: cover;
+            background-position: center;
+        }
+        #startScreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(30, 30, 60, ) 0%, rgba(10, 10, 25, 0.9) 100%);
+            z-index: -1;
+        }
+
+        /* Játék oldal */
+        #gameScreen {
+            background-image: url('background2.jpg');
+            background-color: #87CEEB;
+            background-size: cover;
+            background-position: center;
+            cursor: none;
+        }
+        #gameScreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(135, 180, 220, 0.5) 0%, rgba(180, 210, 240, 0.6) 40%, rgba(200, 220, 240, 0.7) 100%);
+            z-index: -1;
+        }
+
+        /* Befejező oldal */
+        #endScreen {
+            background-image: url('background3.jpg');
+            background-color: #1a1025;
+            background-size: cover;
+            background-position: center;
+        }
+        #endScreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(40, 20, 50, 0.2) 0%, rgba(15, 10, 25, 0.9) 100%);
+            z-index: -1;
+        }
+
+        /* ==================== KEZDŐ OLDAL ==================== */
+        .start-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            z-index: 1;
+        }
+
+        .start-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 40px rgba(226, 0, 116, 0.7), 0 4px 15px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+        @keyframes titlePulse {
+            0%,
+            100% {
+                text-shadow: 0 0 40px rgba(226, 0, 116, 0.7), 0 4px 15px rgba(0, 0, 0, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 60px rgba(226, 0, 116, 1), 0 0 80px rgba(255, 45, 143, 0.6), 0 4px 15px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        .start-subtitle {
+            font-size: clamp(0.95rem, 2vw, 1.2rem);
+            color: #e0e0e0;
+            margin-bottom: 1.8rem;
+            line-height: 1.5;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .score-table {
+            display: inline-block;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 1.2rem 1.8rem;
+            margin-bottom: 2rem;
+            border: 2px solid rgba(226, 0, 116, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .score-table h3 {
+            color: var(--magenta-light);
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+            font-size: 1rem;
+            color: #ddd;
+        }
+        .score-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.4), inset 3px 3px 6px rgba(255, 255, 255, 0.3);
+        }
+        .score-dot.magenta {
+            background: var(--magenta);
+        }
+        .score-dot.gold {
+            background: var(--gold);
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.7), inset -3px -3px 6px rgba(0, 0, 0, 0.4);
+        }
+        .score-dot.black {
+            background: #1a1a1a;
+            border: 1px solid #444;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            color: #fff;
+            background: var(--magenta);
+            box-shadow: 0 6px 20px rgba(226, 0, 116, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:hover {
+            background: var(--magenta-light);
+            box-shadow: 0 8px 30px rgba(226, 0, 116, 0.7);
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 12px rgba(226, 0, 116, 0.4);
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 50%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(25deg);
+            transition: left 0.5s ease;
+        }
+        .btn:hover::after {
+            left: 120%;
+        }
+
+        /* ==================== JÁTÉK OLDAL ==================== */
+        .game-hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            pointer-events: none;
+        }
+        .hud-timer {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(226, 0, 116, 0.5);
+            letter-spacing: 2px;
+            transition: color 0.3s ease;
+        }
+        .hud-timer.warning {
+            color: #ff4444;
+            animation: timerBlink 0.5s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 50, 50, 0.8), 0 0 50px rgba(255, 0, 0, 0.6);
+        }
+        @keyframes timerBlink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .hud-score {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 700;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 18px;
+            border-radius: 30px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: transform 0.15s ease;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+        .hud-score.flash-positive {
+            transform: scale(1.15);
+            color: #4dff4d;
+            text-shadow: 0 0 20px rgba(77, 255, 77, 0.8);
+        }
+        .hud-score.flash-negative {
+            transform: scale(1.1);
+            color: #ff4444;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+        }
+        .hud-score.flash-golden {
+            transform: scale(1.2);
+            color: var(--gold);
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.9);
+        }
+
+        .game-area {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        /* Célkereszt */
+        .crosshair {
+            position: fixed;
+            pointer-events: none;
+            z-index: 20;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6));
+            transition: opacity 0.1s ease;
+        }
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1px;
+        }
+        .crosshair::before {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            box-shadow: 0 0 6px rgba(226, 0, 116, 0.6);
+        }
+        .crosshair::after {
+            height: 2px;
+            width: 100%;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            box-shadow: 0 0 6px rgba(226, 0, 116, 0.6);
+        }
+        .crosshair-ring {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(226, 0, 116, 0.5), inset 0 0 6px rgba(226, 0, 116, 0.3);
+        }
+        .crosshair-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff2d2d;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(255, 30, 30, 0.9);
+        }
+
+        /* Lufik */
+        .balloon {
+            position: absolute;
+            cursor: none;
+            pointer-events: auto;
+            z-index: 6;
+            transition: none;
+            animation: balloonWobble 3s ease-in-out infinite;
+        }
+        @keyframes balloonWobble {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(4px);
+            }
+            75% {
+                transform: translateX(-4px);
+            }
+        }
+        .balloon-body {
+            position: relative;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            box-shadow: inset -4px -6px 15px rgba(0, 0, 0, 0.35), inset 4px 6px 15px rgba(255, 255, 255, 0.3);
+            transition: transform 0.05s ease;
+        }
+        .balloon-knot {
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 8px;
+            border-radius: 0 0 4px 4px;
+            background: inherit;
+            filter: brightness(0.7);
+        }
+        .balloon.magenta .balloon-body {
+            background: radial-gradient(circle at 35% 30%, #ff5daa 0%, var(--magenta) 45%, #8a0046 100%);
+            width: 55px;
+            height: 68px;
+        }
+        .balloon.magenta .balloon-knot {
+            background: #8a0046;
+        }
+        .balloon.black .balloon-body {
+            background: radial-gradient(circle at 35% 30%, #4a4a4a 0%, #1a1a1a 45%, #000 100%);
+            width: 55px;
+            height: 68px;
+            box-shadow: inset -4px -6px 15px rgba(0, 0, 0, 0.6), inset 4px 6px 10px rgba(255, 255, 255, 0.1);
+        }
+        .balloon.black .balloon-knot {
+            background: #000;
+        }
+        .balloon.golden .balloon-body {
+            background: radial-gradient(circle at 35% 30%, #fff8c0 0%, #FFD700 35%, #b8960a 100%);
+            width: 65px;
+            height: 80px;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), 0 0 50px rgba(255, 200, 0, 0.4), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.4);
+            animation: goldenGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes goldenGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), 0 0 50px rgba(255, 200, 0, 0.4), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(255, 215, 0, 1), 0 0 70px rgba(255, 200, 0, 0.7), 0 0 90px rgba(255, 180, 0, 0.4), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.5);
+            }
+        }
+        .balloon.golden .balloon-knot {
+            background: #b8960a;
+        }
+
+        /* Részecskék */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 15;
+            animation: particleBurst 0.6s ease-out forwards;
+        }
+        @keyframes particleBurst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--px), var(--py)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Arany lufi szöveg */
+        .golden-message {
+            position: absolute;
+            pointer-events: none;
+            z-index: 18;
+            font-weight: 900;
+            font-size: clamp(0.85rem, 2vw, 1.1rem);
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 180, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.7);
+            white-space: nowrap;
+            animation: floatUpFade 2.8s ease-out forwards;
+            letter-spacing: 0.5px;
+        }
+        @keyframes floatUpFade {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            40% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-90px);
+                opacity: 0;
+            }
+        }
+
+        /* ==================== BEFEJEZŐ OLDAL ==================== */
+        .end-container {
+            text-align: center;
+            padding: 1.5rem;
+            max-width: 650px;
+            width: 92%;
+            z-index: 1;
+        }
+        .end-score {
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(226, 0, 116, 0.8), 0 0 80px rgba(255, 45, 143, 0.5);
+            margin-bottom: 0.5rem;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+        .end-score-label {
+            font-size: 1.1rem;
+            color: #ccc;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+        .success-summary {
+            background: var(--overlay-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.8rem;
+            text-align: left;
+            border: 1px solid rgba(226, 0, 116, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .success-summary h3 {
+            color: var(--magenta-light);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .success-summary ul {
+            list-style: none;
+            padding: 0;
+        }
+        .success-summary li {
+            color: #e0e0e0;
+            padding: 7px 0 7px 24px;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .success-summary li:last-child {
+            border-bottom: none;
+        }
+        .success-summary li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            top: 7px;
+            color: var(--magenta-light);
+            font-size: 0.7rem;
+        }
+
+        /* ==================== RESZPONZÍV ==================== */
+        @media (max-width: 600px) {
+            .start-container {
+                padding: 1rem;
+            }
+            .score-table {
+                padding: 0.9rem 1.2rem;
+                border-radius: 12px;
+            }
+            .score-row {
+                font-size: 0.9rem;
+                gap: 8px;
+            }
+            .balloon.magenta .balloon-body {
+                width: 42px;
+                height: 52px;
+            }
+            .balloon.black .balloon-body {
+                width: 42px;
+                height: 52px;
+            }
+            .balloon.golden .balloon-body {
+                width: 50px;
+                height: 62px;
+            }
+            .crosshair {
+                width: 36px;
+                height: 36px;
+            }
+            .crosshair-ring {
+                width: 10px;
+                height: 10px;
+            }
+            .game-hud {
+                padding: 8px 12px;
+            }
+            .btn {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+            .success-summary {
+                padding: 1rem;
+                max-height: 40vh;
+            }
+            .success-summary li {
+                font-size: 0.82rem;
+                padding: 5px 0 5px 20px;
+            }
+        }
+        @media (max-width: 380px) {
+            .balloon.magenta .balloon-body {
+                width: 34px;
+                height: 42px;
+            }
+            .balloon.black .balloon-body {
+                width: 34px;
+                height: 42px;
+            }
+            .balloon.golden .balloon-body {
+                width: 40px;
+                height: 50px;
+            }
+            .crosshair {
+                width: 28px;
+                height: 28px;
+            }
+            .crosshair-ring {
+                width: 8px;
+                height: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== KEZDŐ OLDAL ==================== -->
+    <div class="screen active" id="startScreen">
+        <div class="start-container">
+            <h1 class="start-title">Pulzus-Lövölde </h1>
+            <p class="start-subtitle">
+                Lődd ki a lufikat a pontokért!<br>
+                Figyelj a feketékre, mert pontlevonás jár értük!
+            </p>
+            <div class="score-table">
+                <h3>🎯 Pontozás</h3>
+                <div class="score-row">
+                    <span class="score-dot magenta"></span> Magenta lufi: <strong style="color:#ff5daa;">+5 pont</strong>
+                </div>
+                <div class="score-row">
+                    <span class="score-dot gold"></span> Arany lufi: <strong style="color:#FFD700;">+20 pont</strong> <small style="color:#aaa;">(Ritka)</small>
+                </div>
+                <div class="score-row">
+                    <span class="score-dot black"></span> Fekete lufi: <strong style="color:#ff5555;">-10 pont</strong>
+                </div>
+            </div>
+            <button class="btn" id="btnStart" onclick="startGame()">🎮 Játék indítása</button>
+        </div>
+    </div>
+
+    <!-- ==================== JÁTÉK OLDAL ==================== -->
+    <div class="screen hidden" id="gameScreen">
+        <div class="game-hud">
+            <div class="hud-timer" id="hudTimer">60</div>
+            <div class="hud-score" id="hudScore">0 pont</div>
+        </div>
+        <div class="game-area" id="gameArea"></div>
+        <div class="crosshair" id="crosshair" style="display:none;">
+            <div class="crosshair-ring"></div>
+            <div class="crosshair-dot"></div>
+        </div>
+    </div>
+
+    <!-- ==================== BEFEJEZŐ OLDAL ==================== -->
+    <div class="screen hidden" id="endScreen">
+        <div class="end-container">
+            <div class="end-score-label">Végeredmény</div>
+            <div class="end-score" id="endScore">0</div>
+            <div style="color:#ccc; font-size:1rem; margin-bottom:1.5rem;">pont</div>
+            <div class="success-summary">
+                <h3>🏆 Fejlődések 🏆 </h3>
+                <ul>
+                    <li><strong>Béremelés:</strong> Béremelés 2026 májusában 2026. márciusig visszamenőleges hatállyal – differenciált módon, átlagosan 4,5 százalékos béremelést hajtunk végre, amely 2,5 százalékos fix és további 2 százalékos differenciált bérfejlesztést jelent.</li>
+                    <li><strong>Egyszeri jutalom:</strong> 600.000 Ft egyszeri jutalom - A 2025. évi üzleti eredmények alapján minden aktív munkavállaló (a Leadership Squad tagok kivételével).</li>
+                    <li><strong>TeleMix:</strong> Az éves cafeteria keret bruttó 700 000 Ft-ra nőtt.</li>
+                    <li><strong>TEKE:</strong> A havi kedvezmény bruttó 45 000 Ft-ra emelkedett.</li>
+                    <li><strong>Mobil:</strong> Kedvezőbb dolgozói családi mobilcsomagok.</li>
+                    <li><strong>Szemüveg:</strong> Megduplázott szemüvegtámogatási összeg.</li>
+                    <li><strong>Extrák:</strong> 3 hónapos Disney+ előfizetés. Téli olimpia aktivitás és nőnapi ajándékcsomagok.</li>
+                </ul>
+            </div>
+            <button class="btn" id="btnRestart" onclick="restartGame()">🔄 Újra játszom</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== DOM ELEMEK ====================
+            const startScreen = document.getElementById('startScreen');
+            const gameScreen = document.getElementById('gameScreen');
+            const endScreen = document.getElementById('endScreen');
+            const gameArea = document.getElementById('gameArea');
+            const crosshair = document.getElementById('crosshair');
+            const hudTimer = document.getElementById('hudTimer');
+            const hudScore = document.getElementById('hudScore');
+            const endScore = document.getElementById('endScore');
+            const btnStart = document.getElementById('btnStart');
+            const btnRestart = document.getElementById('btnRestart');
+
+            // ==================== AUDIO RENDSZER ====================
+            let audioCtx = null;
+
+            function initAudio() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.warn('AudioContext nem elérhető');
+                        return false;
+                    }
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                return true;
+            }
+
+            function playGunshot() {
+                if (!audioCtx) return;
+                try {
+                    const duration = 0.18;
+                    const sampleRate = audioCtx.sampleRate;
+                    const length = Math.floor(sampleRate * duration);
+                    const buffer = audioCtx.createBuffer(1, length, sampleRate);
+                    const data = buffer.getChannelData(0);
+
+                    for (let i = 0; i < length; i++) {
+                        const t = i / sampleRate;
+                        const envelope = Math.exp(-t * 30);
+                        const noise = (Math.random() * 2 - 1);
+                        const lowFreq = Math.sin(2 * Math.PI * 80 * t) * 0.5;
+                        const mixed = noise * 0.7 + lowFreq * 0.3;
+                        data[i] = mixed * envelope * 0.8;
+                    }
+
+                    const source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + duration);
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.setValueAtTime(0.9, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                    source.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    source.start(audioCtx.currentTime);
+                    source.stop(audioCtx.currentTime + duration);
+                } catch (e) {
+                    // silent fail
+                }
+            }
+
+            function playPop() {
+                if (!audioCtx) return;
+                try {
+                    const duration = 0.1;
+                    const sampleRate = audioCtx.sampleRate;
+                    const length = Math.floor(sampleRate * duration);
+                    const buffer = audioCtx.createBuffer(1, length, sampleRate);
+                    const data = buffer.getChannelData(0);
+
+                    for (let i = 0; i < length; i++) {
+                        const t = i / sampleRate;
+                        const envelope = Math.exp(-t * 50);
+                        const noise = (Math.random() * 2 - 1);
+                        data[i] = noise * envelope * 0.7;
+                    }
+
+                    const source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                    source.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    source.start(audioCtx.currentTime);
+                    source.stop(audioCtx.currentTime + duration);
+                } catch (e) {
+                    // silent fail
+                }
+            }
+
+            function playGoldenPop() {
+                if (!audioCtx) return;
+                try {
+                    // Extra csilingelő hang arany lufihoz
+                    const duration = 0.35;
+                    const sampleRate = audioCtx.sampleRate;
+                    const length = Math.floor(sampleRate * duration);
+                    const buffer = audioCtx.createBuffer(1, length, sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < length; i++) {
+                        const t = i / sampleRate;
+                        const envelope = Math.exp(-t * 8);
+                        const tone = Math.sin(2 * Math.PI * 1600 * t) * 0.4 + Math.sin(2 * Math.PI * 2400 * t) * 0.3;
+                        data[i] = tone * envelope * 0.6;
+                    }
+                    const source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.setValueAtTime(0.7, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                    source.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    source.start(audioCtx.currentTime + 0.05);
+                    source.stop(audioCtx.currentTime + duration + 0.05);
+                } catch (e) {
+                    // silent fail
+                }
+            }
+
+            // ==================== JÁTÉK ÁLLAPOT ====================
+            const GAME_DURATION = 60;
+            const BASE_SPAWN_INTERVAL = 1400; // ms
+            const BASE_SPEED = 2.0; // megnövelt alapsebesség (eredetileg 1.3)
+            const DIFFICULTY_INTERVAL = 10; // másodpercenként nő a nehézség
+            const DIFFICULTY_MULTIPLIER = 1.20; // 20% növekedés
+
+            // Az arany lufik üzenetei – garantáltan mind megjelenik, mielőtt ismétlődne
+            const goldenMessagesPool = [
+                'Átlagosan 4,5 százalékos béremelés',
+                '600.000 Ft egyszeri jutalom',
+                'Emelkedett a Telemix',
+                'Emelkedett a TEKE',
+                'Új dolgozói mobil csomagok',
+                'Dupla szemüveg támogatás',
+                '3 hónapos Disney + előfizetés',
+                'Téli olimpia aktivitás',
+            ];
+
+            // A játék közben használt, kevert üzenetlista és index
+            let messageQueue = [];
+            let messageIndex = 0;
+
+            function shuffleArray(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            function getNextGoldenMessage() {
+                // Ha üres a queue vagy a végére értünk, újrakeverjük
+                if (messageQueue.length === 0 || messageIndex >= messageQueue.length) {
+                    messageQueue = shuffleArray(goldenMessagesPool);
+                    messageIndex = 0;
+                }
+                const msg = messageQueue[messageIndex];
+                messageIndex++;
+                return msg;
+            }
+
+            let gameState = {
+                running: false,
+                score: 0,
+                timeRemaining: GAME_DURATION,
+                speedMultiplier: 1.0,
+                spawnIntervalMs: BASE_SPAWN_INTERVAL,
+                balloons: [],
+                spawnTimerId: null,
+                animFrameId: null,
+                difficultyTimerId: null,
+                gameTimerId: null,
+            };
+
+            // ==================== SEGÉDFÜGGVÉNYEK ====================
+            function switchScreen(showScreen) {
+                [startScreen, gameScreen, endScreen].forEach(s => {
+                    s.classList.remove('active');
+                    s.classList.add('hidden');
+                });
+                showScreen.classList.remove('hidden');
+                showScreen.classList.add('active');
+            }
+
+            function getRandomArbitrary(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            // ==================== LUFI LÉTREHOZÁS ====================
+            function getBalloonType() {
+                const roll = Math.random();
+                if (roll < 0.10) return 'golden'; // 10%
+                if (roll < 0.30) return 'black'; // 20%
+                return 'magenta'; // 70%
+            }
+
+            function createBalloon() {
+                if (!gameState.running) return;
+
+                const gameAreaRect = gameArea.getBoundingClientRect();
+                const areaWidth = gameAreaRect.width;
+                const areaHeight = gameAreaRect.height;
+
+                const type = getBalloonType();
+                let balloonWidth, balloonHeight;
+                if (type === 'golden') {
+                    balloonWidth = areaWidth < 400 ? 40 : 65;
+                    balloonHeight = areaWidth < 400 ? 50 : 80;
+                } else {
+                    balloonWidth = areaWidth < 400 ? 34 : 55;
+                    balloonHeight = areaWidth < 400 ? 42 : 68;
+                }
+
+                const maxLeft = areaWidth - balloonWidth - 10;
+                const left = getRandomArbitrary(10, Math.max(15, maxLeft));
+                const startBottom = -(balloonHeight + getRandomArbitrary(10, 60));
+
+                const balloonEl = document.createElement('div');
+                balloonEl.className = `balloon ${type}`;
+                balloonEl.style.left = left + 'px';
+                balloonEl.style.bottom = startBottom + 'px';
+                balloonEl.style.width = balloonWidth + 'px';
+                balloonEl.style.height = balloonHeight + 'px';
+                balloonEl.innerHTML = `
+                    <div class="balloon-body" style="width:100%;height:100%;"></div>
+                    <div class="balloon-knot"></div>
+                `;
+                balloonEl.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (!gameState.running) return;
+                    popBalloon(balloonEl, type);
+                });
+                balloonEl.addEventListener('touchend', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (!gameState.running) return;
+                    popBalloon(balloonEl, type);
+                });
+
+                gameArea.appendChild(balloonEl);
+                gameState.balloons.push({
+                    el: balloonEl,
+                    type: type,
+                    bottom: startBottom,
+                    speed: BASE_SPEED * gameState.speedMultiplier * getRandomArbitrary(0.85, 1.25),
+                    wobbleOffset: getRandomArbitrary(0, Math.PI * 2),
+                });
+            }
+
+            function popBalloon(balloonEl, type) {
+                if (!gameState.running) return;
+                if (balloonEl.dataset.popped === 'true') return;
+                balloonEl.dataset.popped = 'true';
+
+                const rect = balloonEl.getBoundingClientRect();
+                const gameAreaRect = gameArea.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2 - gameAreaRect.left;
+                const cy = rect.top + rect.height / 2 - gameAreaRect.top;
+
+                // Hangok
+                playGunshot();
+                setTimeout(() => {
+                    if (type === 'golden') {
+                        playPop();
+                        playGoldenPop();
+                    } else {
+                        playPop();
+                    }
+                }, 40);
+
+                // Pontozás
+                let points = 0;
+                let flashClass = '';
+                if (type === 'magenta') {
+                    points = 5;
+                    flashClass = 'flash-positive';
+                } else if (type === 'golden') {
+                    points = 20;
+                    flashClass = 'flash-golden';
+                } else if (type === 'black') {
+                    points = -10;
+                    flashClass = 'flash-negative';
+                }
+                gameState.score += points;
+                if (gameState.score < 0) gameState.score = 0;
+                updateScoreDisplay(flashClass);
+
+                // Részecskék
+                spawnParticles(cx, cy, type);
+
+                // Arany lufi üzenet – most a garantált sorrendből
+                if (type === 'golden') {
+                    const msg = getNextGoldenMessage();
+                    spawnGoldenMessage(cx, cy, msg);
+                }
+
+                // Lufi eltávolítása
+                removeBalloon(balloonEl);
+            }
+
+            function removeBalloon(balloonEl) {
+                const idx = gameState.balloons.findIndex(b => b.el === balloonEl);
+                if (idx >= 0) {
+                    gameState.balloons.splice(idx, 1);
+                }
+                if (balloonEl.parentNode) {
+                    balloonEl.remove();
+                }
+            }
+
+            function spawnParticles(cx, cy, type) {
+                const count = type === 'golden' ? 14 : 7;
+                const baseColor = type === 'magenta' ? '#E20074' :
+                    type === 'golden' ? '#FFD700' : '#333333';
+                const gameAreaRect = gameArea.getBoundingClientRect();
+
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    const size = getRandomArbitrary(3, 8);
+                    const angle = getRandomArbitrary(0, Math.PI * 2);
+                    const distance = getRandomArbitrary(25, 70);
+                    const px = Math.cos(angle) * distance;
+                    const py = Math.sin(angle) * distance - getRandomArbitrary(5, 25);
+                    particle.style.cssText = `
+                        width: ${size}px;
+                        height: ${size}px;
+                        background: ${baseColor};
+                        left: ${cx}px;
+                        top: ${cy}px;
+                        --px: ${px}px;
+                        --py: ${py}px;
+                        box-shadow: 0 0 ${size*2}px ${baseColor};
+                    `;
+                    gameArea.appendChild(particle);
+                    setTimeout(() => {
+                        if (particle.parentNode) particle.remove();
+                    }, 650);
+                }
+            }
+
+            function spawnGoldenMessage(cx, cy, msg) {
+                const msgEl = document.createElement('div');
+                msgEl.className = 'golden-message';
+                msgEl.textContent = '✨ ' + msg + ' ✨';
+                msgEl.style.left = cx + 'px';
+                msgEl.style.top = cy + 'px';
+                // Középre igazítás
+                msgEl.style.transform = 'translate(-50%, -50%)';
+                msgEl.style.animation = 'floatUpFade 2.8s ease-out forwards';
+                gameArea.appendChild(msgEl);
+                setTimeout(() => {
+                    if (msgEl.parentNode) msgEl.remove();
+                }, 2900);
+            }
+
+            function updateScoreDisplay(flashClass) {
+                hudScore.textContent = gameState.score + ' pont';
+                if (flashClass) {
+                    hudScore.classList.add(flashClass);
+                    setTimeout(() => {
+                        hudScore.classList.remove(flashClass);
+                    }, 250);
+                }
+            }
+
+            // ==================== JÁTÉK CIKLUS ====================
+            function gameLoop() {
+                if (!gameState.running) return;
+
+                const gameAreaRect = gameArea.getBoundingClientRect();
+                const areaHeight = gameAreaRect.height;
+
+                const balloonsToRemove = [];
+                gameState.balloons.forEach(b => {
+                    b.bottom += b.speed;
+                    b.el.style.bottom = b.bottom + 'px';
+                    if (b.bottom > areaHeight + 100) {
+                        balloonsToRemove.push(b.el);
+                    }
+                });
+
+                balloonsToRemove.forEach(el => removeBalloon(el));
+
+                gameState.animFrameId = requestAnimationFrame(gameLoop);
+            }
+
+            function spawnLoop() {
+                if (!gameState.running) return;
+                createBalloon();
+                gameState.spawnTimerId = setTimeout(spawnLoop, gameState.spawnIntervalMs);
+            }
+
+            function increaseDifficulty() {
+                if (!gameState.running) return;
+                gameState.speedMultiplier *= DIFFICULTY_MULTIPLIER;
+                gameState.spawnIntervalMs = Math.max(350, Math.floor(gameState.spawnIntervalMs / DIFFICULTY_MULTIPLIER));
+                // Újraindítjuk a spawn timert az új intervallummal
+                if (gameState.spawnTimerId) {
+                    clearTimeout(gameState.spawnTimerId);
+                    gameState.spawnTimerId = setTimeout(spawnLoop, gameState.spawnIntervalMs);
+                }
+            }
+
+            function updateTimer() {
+                if (!gameState.running) return;
+                gameState.timeRemaining--;
+                hudTimer.textContent = gameState.timeRemaining;
+
+                if (gameState.timeRemaining <= 10) {
+                    hudTimer.classList.add('warning');
+                }
+
+                if (gameState.timeRemaining <= 0) {
+                    endGame();
+                    return;
+                }
+
+                // Nehézség növelése 10 másodpercenként (20%-kal)
+                const elapsed = GAME_DURATION - gameState.timeRemaining;
+                if (elapsed > 0 && elapsed % DIFFICULTY_INTERVAL === 0) {
+                    increaseDifficulty();
+                }
+
+                gameState.gameTimerId = setTimeout(updateTimer, 1000);
+            }
+
+            // ==================== JÁTÉK INDÍTÁS / LEÁLLÍTÁS ====================
+            function startGame() {
+                initAudio();
+                // AudioContext feloldása user gesture-re
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // Üzenetlista alaphelyzetbe – véletlen sorrenddel indul
+                messageQueue = shuffleArray(goldenMessagesPool);
+                messageIndex = 0;
+
+                // Állapot reset
+                gameState = {
+                    running: true,
+                    score: 0,
+                    timeRemaining: GAME_DURATION,
+                    speedMultiplier: 1.0,
+                    spawnIntervalMs: BASE_SPAWN_INTERVAL,
+                    balloons: [],
+                    spawnTimerId: null,
+                    animFrameId: null,
+                    difficultyTimerId: null,
+                    gameTimerId: null,
+                };
+
+                // UI reset
+                hudTimer.textContent = GAME_DURATION;
+                hudTimer.classList.remove('warning');
+                hudScore.textContent = '0 pont';
+                hudScore.classList.remove('flash-positive', 'flash-negative', 'flash-golden');
+                gameArea.innerHTML = '';
+                crosshair.style.display = 'block';
+
+                // Képernyő váltás
+                switchScreen(gameScreen);
+
+                // Kurzor elrejtése a játéktéren
+                gameArea.style.cursor = 'none';
+                document.body.style.cursor = 'none';
+
+                // Játék ciklusok indítása
+                gameState.animFrameId = requestAnimationFrame(gameLoop);
+                gameState.spawnTimerId = setTimeout(spawnLoop, 300);
+                gameState.gameTimerId = setTimeout(updateTimer, 1000);
+
+                // Első lufi azonnal
+                setTimeout(() => {
+                    if (gameState.running) createBalloon();
+                }, 150);
+            }
+
+            function endGame() {
+                gameState.running = false;
+
+                // Takarítás
+                if (gameState.spawnTimerId) clearTimeout(gameState.spawnTimerId);
+                if (gameState.gameTimerId) clearTimeout(gameState.gameTimerId);
+                if (gameState.animFrameId) cancelAnimationFrame(gameState.animFrameId);
+
+                // Maradék lufik eltávolítása
+                gameState.balloons.forEach(b => {
+                    if (b.el.parentNode) b.el.remove();
+                });
+                gameState.balloons = [];
+                gameArea.innerHTML = '';
+
+                // Kurzor visszaállítása
+                gameArea.style.cursor = 'default';
+                document.body.style.cursor = 'default';
+                crosshair.style.display = 'none';
+                hudTimer.classList.remove('warning');
+
+                // Eredmény kijelzése
+                endScore.textContent = gameState.score;
+
+                // Képernyő váltás
+                switchScreen(endScreen);
+            }
+
+            function restartGame() {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                gameArea.innerHTML = '';
+                crosshair.style.display = 'none';
+                document.body.style.cursor = 'default';
+                gameArea.style.cursor = 'default';
+                switchScreen(startScreen);
+            }
+
+            // ==================== EGÉR / ÉRINTÉS KEZELÉS ====================
+            function updateCrosshairPosition(x, y) {
+                crosshair.style.left = x + 'px';
+                crosshair.style.top = y + 'px';
+                crosshair.style.display = 'block';
+            }
+
+            document.addEventListener('mousemove', function(e) {
+                if (!gameState.running) return;
+                updateCrosshairPosition(e.clientX, e.clientY);
+            });
+
+            document.addEventListener('touchmove', function(e) {
+                if (!gameState.running) return;
+                if (e.touches.length > 0) {
+                    updateCrosshairPosition(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchstart', function(e) {
+                if (!gameState.running) return;
+                if (e.touches.length > 0) {
+                    updateCrosshairPosition(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            // Kattintás a játéktéren (mellélövés)
+            gameArea.addEventListener('click', function(e) {
+                if (!gameState.running) return;
+                // Ha nem lufin történt a kattintás (a lufi handler stopPropagation-t hív)
+                if (e.target === gameArea || e.target.classList.contains('game-area')) {
+                    playGunshot();
+                }
+            });
+
+            gameArea.addEventListener('touchend', function(e) {
+                if (!gameState.running) return;
+                if (e.target === gameArea || e.target.classList.contains('game-area')) {
+                    playGunshot();
+                }
+            });
+
+            // ==================== BILLENTYŰZET ====================
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    if (startScreen.classList.contains('active')) {
+                        e.preventDefault();
+                        startGame();
+                    } else if (endScreen.classList.contains('active')) {
+                        e.preventDefault();
+                        restartGame();
+                    }
+                }
+            });
+
+            // ==================== ABLAK ÁTMÉRETEZÉS ====================
+            window.addEventListener('resize', function() {
+                if (!gameState.running) return;
+                // A lufik pozícióját a gameArea határain belül tartjuk
+                const gameAreaRect = gameArea.getBoundingClientRect();
+                const areaWidth = gameAreaRect.width;
+                gameState.balloons.forEach(b => {
+                    const elWidth = b.el.offsetWidth;
+                    const currentLeft = parseFloat(b.el.style.left) || 0;
+                    if (currentLeft + elWidth > areaWidth) {
+                        b.el.style.left = Math.max(5, areaWidth - elWidth - 10) + 'px';
+                    }
+                });
+            });
+
+            // ==================== INICIALIZÁLÁS ====================
+            function init() {
+                switchScreen(startScreen);
+                crosshair.style.display = 'none';
+                document.body.style.cursor = 'default';
+                gameArea.style.cursor = 'default';
+                gameArea.innerHTML = '';
+            }
+
+            // Gombok eseménykezelői
+            btnStart.addEventListener('click', startGame);
+            btnRestart.addEventListener('click', restartGame);
+
+            // Első interakcióra audio init
+            document.addEventListener('click', function audioUnlock() {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }, { once: false });
+
+            init();
+            console.log('🎈 Pulzus-Lövölde - Gyorsabb lufik (BASE_SPEED=2.0)');
+        })();
+    </script>
+</body>
+</html>
