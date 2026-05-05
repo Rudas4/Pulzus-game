@@ -2,8 +2,8 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pulzus-lufi vadászat - 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pulzus Lufi - 5 magenta kihagyás (gyorsulás, de normális lufiszám)</title>
     <style>
         :root {
             --magenta: #E20074;
@@ -38,7 +38,6 @@
             touch-action: manipulation;
         }
 
-        /* ==================== KÉPERNYŐK ==================== */
         .screen {
             position: absolute;
             inset: 0;
@@ -70,7 +69,6 @@
             z-index: 2;
         }
 
-        /* Kezdő oldal */
         #startScreen {
             background-image: url('background1.jpg');
             background-color: #1a1a2e;
@@ -81,11 +79,10 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at center, rgba(30, 30, 60, ) 0%, rgba(10, 10, 25, 0.9) 100%);
+            background: radial-gradient(ellipse at center, rgba(30, 30, 60, 0.3) 0%, rgba(10, 10, 25, 0.2) 100%);
             z-index: -1;
         }
 
-        /* Játék oldal */
         #gameScreen {
             background-image: url('background2.jpg');
             background-color: #87CEEB;
@@ -101,7 +98,6 @@
             z-index: -1;
         }
 
-        /* Befejező oldal */
         #endScreen {
             background-image: url('background3.jpg');
             background-color: #1a1025;
@@ -112,11 +108,10 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at center, rgba(40, 20, 50, 0.2) 0%, rgba(15, 10, 25, 0.9) 100%);
+            background: radial-gradient(ellipse at center, rgba(40, 20, 50, 0.2) 0%, rgba(15, 10, 25, 0.2) 100%);
             z-index: -1;
         }
 
-        /* ==================== KEZDŐ OLDAL ==================== */
         .start-container {
             text-align: center;
             padding: 2rem;
@@ -135,21 +130,26 @@
             animation: titlePulse 2s ease-in-out infinite;
         }
         @keyframes titlePulse {
-            0%,
-            100% {
-                text-shadow: 0 0 40px rgba(226, 0, 116, 0.7), 0 4px 15px rgba(0, 0, 0, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 60px rgba(226, 0, 116, 1), 0 0 80px rgba(255, 45, 143, 0.6), 0 4px 15px rgba(0, 0, 0, 0.5);
-            }
+            0%, 100% { text-shadow: 0 0 40px rgba(226, 0, 116, 0.7), 0 4px 15px rgba(0, 0, 0, 0.5); }
+            50% { text-shadow: 0 0 60px rgba(226, 0, 116, 1), 0 0 80px rgba(255, 45, 143, 0.6), 0 4px 15px rgba(0, 0, 0, 0.5); }
         }
 
         .start-subtitle {
             font-size: clamp(0.95rem, 2vw, 1.2rem);
             color: #e0e0e0;
-            margin-bottom: 1.8rem;
+            margin-bottom: 1rem;
             line-height: 1.5;
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+        }
+        .rule-highlight {
+            background: rgba(226, 0, 116, 0.3);
+            border-radius: 40px;
+            padding: 10px 16px;
+            display: inline-block;
+            margin: 12px auto;
+            font-weight: bold;
+            color: #FFD966;
+            backdrop-filter: blur(4px);
         }
 
         .score-table {
@@ -157,16 +157,14 @@
             background: var(--panel-bg);
             border-radius: 16px;
             padding: 1.2rem 1.8rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.8rem;
             border: 2px solid rgba(226, 0, 116, 0.4);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
         .score-table h3 {
             color: var(--magenta-light);
             margin-bottom: 0.8rem;
             font-size: 1.1rem;
-            letter-spacing: 1px;
         }
         .score-row {
             display: flex;
@@ -183,17 +181,9 @@
             flex-shrink: 0;
             box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.4), inset 3px 3px 6px rgba(255, 255, 255, 0.3);
         }
-        .score-dot.magenta {
-            background: var(--magenta);
-        }
-        .score-dot.gold {
-            background: var(--gold);
-            box-shadow: 0 0 14px rgba(255, 215, 0, 0.7), inset -3px -3px 6px rgba(0, 0, 0, 0.4);
-        }
-        .score-dot.black {
-            background: #1a1a1a;
-            border: 1px solid #444;
-        }
+        .score-dot.magenta { background: var(--magenta); }
+        .score-dot.gold { background: var(--gold); box-shadow: 0 0 14px rgba(255, 215, 0, 0.7), inset -3px -3px 6px rgba(0, 0, 0, 0.4); }
+        .score-dot.black { background: #1a1a1a; border: 1px solid #444; }
 
         .btn {
             display: inline-block;
@@ -219,24 +209,8 @@
         }
         .btn:active {
             transform: scale(0.96);
-            box-shadow: 0 4px 12px rgba(226, 0, 116, 0.4);
-        }
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 50%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(25deg);
-            transition: left 0.5s ease;
-        }
-        .btn:hover::after {
-            left: 120%;
         }
 
-        /* ==================== JÁTÉK OLDAL ==================== */
         .game-hud {
             position: absolute;
             top: 0;
@@ -249,27 +223,21 @@
             padding: 12px 20px;
             pointer-events: none;
         }
-        .hud-timer {
-            font-size: clamp(1.8rem, 4vw, 2.8rem);
-            font-weight: 900;
+        .hud-streak {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: bold;
             color: #fff;
-            text-shadow: 0 0 20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(226, 0, 116, 0.5);
-            letter-spacing: 2px;
-            transition: color 0.3s ease;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 16px;
+            border-radius: 40px;
+            backdrop-filter: blur(8px);
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(226, 0, 116, 0.7);
+            border-left: 4px solid var(--magenta);
         }
-        .hud-timer.warning {
-            color: #ff4444;
-            animation: timerBlink 0.5s ease-in-out infinite;
-            text-shadow: 0 0 20px rgba(255, 50, 50, 0.8), 0 0 50px rgba(255, 0, 0, 0.6);
-        }
-        @keyframes timerBlink {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
+        .hud-streak strong {
+            color: #ff88c2;
+            font-size: 1.4rem;
         }
         .hud-score {
             font-size: clamp(1.3rem, 3vw, 2rem);
@@ -279,9 +247,7 @@
             padding: 8px 18px;
             border-radius: 30px;
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             transition: transform 0.15s ease;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
         }
         .hud-score.flash-positive {
             transform: scale(1.15);
@@ -307,7 +273,6 @@
             cursor: none;
         }
 
-        /* Célkereszt */
         .crosshair {
             position: fixed;
             pointer-events: none;
@@ -316,10 +281,8 @@
             height: 50px;
             transform: translate(-50%, -50%);
             filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6));
-            transition: opacity 0.1s ease;
         }
-        .crosshair::before,
-        .crosshair::after {
+        .crosshair::before, .crosshair::after {
             content: '';
             position: absolute;
             background: rgba(255, 255, 255, 0.9);
@@ -350,7 +313,6 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 8px rgba(226, 0, 116, 0.5), inset 0 0 6px rgba(226, 0, 116, 0.3);
         }
         .crosshair-dot {
             position: absolute;
@@ -361,35 +323,24 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 8px rgba(255, 30, 30, 0.9);
         }
 
-        /* Lufik */
         .balloon {
             position: absolute;
             cursor: none;
             pointer-events: auto;
             z-index: 6;
-            transition: none;
             animation: balloonWobble 3s ease-in-out infinite;
         }
         @keyframes balloonWobble {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            25% {
-                transform: translateX(4px);
-            }
-            75% {
-                transform: translateX(-4px);
-            }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(4px); }
+            75% { transform: translateX(-4px); }
         }
         .balloon-body {
             position: relative;
             border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
             box-shadow: inset -4px -6px 15px rgba(0, 0, 0, 0.35), inset 4px 6px 15px rgba(255, 255, 255, 0.3);
-            transition: transform 0.05s ease;
         }
         .balloon-knot {
             position: absolute;
@@ -407,39 +358,27 @@
             width: 55px;
             height: 68px;
         }
-        .balloon.magenta .balloon-knot {
-            background: #8a0046;
-        }
+        .balloon.magenta .balloon-knot { background: #8a0046; }
         .balloon.black .balloon-body {
             background: radial-gradient(circle at 35% 30%, #4a4a4a 0%, #1a1a1a 45%, #000 100%);
             width: 55px;
             height: 68px;
             box-shadow: inset -4px -6px 15px rgba(0, 0, 0, 0.6), inset 4px 6px 10px rgba(255, 255, 255, 0.1);
         }
-        .balloon.black .balloon-knot {
-            background: #000;
-        }
+        .balloon.black .balloon-knot { background: #000; }
         .balloon.golden .balloon-body {
             background: radial-gradient(circle at 35% 30%, #fff8c0 0%, #FFD700 35%, #b8960a 100%);
             width: 65px;
             height: 80px;
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), 0 0 50px rgba(255, 200, 0, 0.4), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.4);
             animation: goldenGlow 1.5s ease-in-out infinite;
         }
         @keyframes goldenGlow {
-            0%,
-            100% {
-                box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), 0 0 50px rgba(255, 200, 0, 0.4), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 35px rgba(255, 215, 0, 1), 0 0 70px rgba(255, 200, 0, 0.7), 0 0 90px rgba(255, 180, 0, 0.4), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.5);
-            }
+            0%, 100% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(255, 215, 0, 1), 0 0 70px rgba(255, 200, 0, 0.7), inset -4px -6px 15px rgba(0, 0, 0, 0.3), inset 4px 6px 15px rgba(255, 255, 255, 0.5); }
         }
-        .balloon.golden .balloon-knot {
-            background: #b8960a;
-        }
+        .balloon.golden .balloon-knot { background: #b8960a; }
 
-        /* Részecskék */
         .particle {
             position: absolute;
             border-radius: 50%;
@@ -448,17 +387,10 @@
             animation: particleBurst 0.6s ease-out forwards;
         }
         @keyframes particleBurst {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--px), var(--py)) scale(0);
-                opacity: 0;
-            }
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
         }
 
-        /* Arany lufi szöveg */
         .golden-message {
             position: absolute;
             pointer-events: none;
@@ -466,26 +398,15 @@
             font-weight: 900;
             font-size: clamp(0.85rem, 2vw, 1.1rem);
             color: #FFD700;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 180, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.7);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
             white-space: nowrap;
             animation: floatUpFade 2.8s ease-out forwards;
-            letter-spacing: 0.5px;
         }
         @keyframes floatUpFade {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            40% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-90px);
-                opacity: 0;
-            }
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-90px); opacity: 0; }
         }
 
-        /* ==================== BEFEJEZŐ OLDAL ==================== */
         .end-container {
             text-align: center;
             padding: 1.5rem;
@@ -497,9 +418,8 @@
             font-size: clamp(2.5rem, 7vw, 5rem);
             font-weight: 900;
             color: #fff;
-            text-shadow: 0 0 40px rgba(226, 0, 116, 0.8), 0 0 80px rgba(255, 45, 143, 0.5);
+            text-shadow: 0 0 40px rgba(226, 0, 116, 0.8);
             margin-bottom: 0.5rem;
-            animation: titlePulse 2s ease-in-out infinite;
         }
         .end-score-label {
             font-size: 1.1rem;
@@ -516,7 +436,6 @@
             text-align: left;
             border: 1px solid rgba(226, 0, 116, 0.3);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             max-height: 50vh;
             overflow-y: auto;
         }
@@ -524,9 +443,7 @@
             color: var(--magenta-light);
             margin-bottom: 1rem;
             font-size: 1.1rem;
-            letter-spacing: 1px;
             text-align: center;
-            text-transform: uppercase;
         }
         .success-summary ul {
             list-style: none;
@@ -537,11 +454,7 @@
             padding: 7px 0 7px 24px;
             position: relative;
             font-size: 0.95rem;
-            line-height: 1.5;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .success-summary li:last-child {
-            border-bottom: none;
         }
         .success-summary li::before {
             content: '✦';
@@ -549,121 +462,36 @@
             left: 0;
             top: 7px;
             color: var(--magenta-light);
-            font-size: 0.7rem;
         }
-
-        /* ==================== RESZPONZÍV ==================== */
         @media (max-width: 600px) {
-            .start-container {
-                padding: 1rem;
-            }
-            .score-table {
-                padding: 0.9rem 1.2rem;
-                border-radius: 12px;
-            }
-            .score-row {
-                font-size: 0.9rem;
-                gap: 8px;
-            }
-            .balloon.magenta .balloon-body {
-                width: 42px;
-                height: 52px;
-            }
-            .balloon.black .balloon-body {
-                width: 42px;
-                height: 52px;
-            }
-            .balloon.golden .balloon-body {
-                width: 50px;
-                height: 62px;
-            }
-            .crosshair {
-                width: 36px;
-                height: 36px;
-            }
-            .crosshair-ring {
-                width: 10px;
-                height: 10px;
-            }
-            .game-hud {
-                padding: 8px 12px;
-            }
-            .btn {
-                padding: 12px 30px;
-                font-size: 1rem;
-            }
-            .success-summary {
-                padding: 1rem;
-                max-height: 40vh;
-            }
-            .success-summary li {
-                font-size: 0.82rem;
-                padding: 5px 0 5px 20px;
-            }
+            .balloon.magenta .balloon-body, .balloon.black .balloon-body { width: 42px; height: 52px; }
+            .balloon.golden .balloon-body { width: 50px; height: 62px; }
+            .crosshair { width: 36px; height: 36px; }
+            .crosshair-ring { width: 10px; height: 10px; }
         }
-        @media (max-width: 380px) {
-            .balloon.magenta .balloon-body {
-                width: 34px;
-                height: 42px;
-            }
-            .balloon.black .balloon-body {
-                width: 34px;
-                height: 42px;
-            }
-            .balloon.golden .balloon-body {
-                width: 40px;
-                height: 50px;
-            }
-            .crosshair {
-                width: 28px;
-                height: 28px;
-            }
-            .crosshair-ring {
-                width: 8px;
-                height: 8px;
-            }
-        }
-        </style>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D059D7QM20"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-D059D7QM20');
-    </script>
+    </style>
 </head>
 <body>
 
-    <!-- ==================== KEZDŐ OLDAL ==================== -->
     <div class="screen active" id="startScreen">
         <div class="start-container">
-            <h1 class="start-title">Pulzus-Lövölde </h1>
-            <p class="start-subtitle">
-                Lődd ki a lufikat a pontokért!<br>
-                Figyelj a feketékre, mert pontlevonás jár értük!
-            </p>
-            <div class="score-table">
-                <h3>🎯 Pontozás</h3>
-                <div class="score-row">
-                    <span class="score-dot magenta"></span> Magenta lufi: <strong style="color:#ff5daa;">+5 pont</strong>
-                </div>
-                <div class="score-row">
-                    <span class="score-dot gold"></span> Arany lufi: <strong style="color:#FFD700;">+20 pont</strong> <small style="color:#aaa;">(Ritka)</small>
-                </div>
-                <div class="score-row">
-                    <span class="score-dot black"></span> Fekete lufi: <strong style="color:#ff5555;">-10 pont</strong>
-                </div>
+            <h1 class="start-title">Pulzus-Lövölde</h1>
+                        <div class="score-table">
+                <h3>🎯 Pontozás & szabály</h3>
+                <div class="score-row"><span class="score-dot magenta"></span> Magenta lufi: <strong>+5 pont</strong> </div>
+                <div class="score-row"><span class="score-dot gold"></span> Arany lufi: <strong>+20 pont</strong> ✨ </div>
+                <div class="score-row"><span class="score-dot black"></span> Fekete lufi: <strong style="color:#ff5555;">-10 pont</strong></div>
+                <div class="score-row" style="margin-top:8px; border-top:1px solid #444; padding-top:8px;">💡 Ha egy MAGENTA lufi elúszik kilövés nélkül → nő a sorozat számláló. Ha kilövöd → nullázódik.</div>
+                <div class="score-row"> ❌ <strong style="color:#ff5555">5 egymás utáni kilővetlen magenta lufi után vége!</strong></div>
+                <div class="score-row" style="font-size:0.85rem;">⚡ A lufik folyamatosan gyorsulnak.</div>
             </div>
-            <button class="btn" id="btnStart" onclick="startGame()">🎮 Játék indítása</button>
+            <button class="btn" id="btnStart">🎈 Indítás</button>
         </div>
     </div>
 
-    <!-- ==================== JÁTÉK OLDAL ==================== -->
     <div class="screen hidden" id="gameScreen">
         <div class="game-hud">
-            <div class="hud-timer" id="hudTimer">60</div>
+            <div class="hud-streak" id="hudStreak"> Sorozat: 0 / 5</div>
             <div class="hud-score" id="hudScore">0 pont</div>
         </div>
         <div class="game-area" id="gameArea"></div>
@@ -673,16 +501,15 @@
         </div>
     </div>
 
-    <!-- ==================== BEFEJEZŐ OLDAL ==================== -->
     <div class="screen hidden" id="endScreen">
         <div class="end-container">
-            <div class="end-score-label">Végeredmény</div>
+            <div class="end-score-label">🎉 JÁTÉK VÉGE 🎉</div>
             <div class="end-score" id="endScore">0</div>
-            <div style="color:#ccc; font-size:1rem; margin-bottom:1.5rem;">pont</div>
+            <div style="color:#ccc; margin-bottom:1.5rem;">Összpontszám</div>
             <div class="success-summary">
-                <h3>🏆 Fejlődések 🏆 </h3>
+                <h3>🏆 Fejlődések 🏆</h3>
                 <ul>
-                    <li><strong>Béremelés:</strong>  2026. márciusáig visszamenőleg, differenciált módon, átlagosan 4,5 százalékos béremelést hajtottunk végre, amely 2,5 százalékos fix és további 2 százalékos differenciált bérfejlesztést jelent..</li>
+                    <li><strong>Béremelés:</strong>  2026. márciusáig visszamenőleg, differenciált módon, átlagosan 4,5 százalékos béremelést hajtottunk végre, amely 2,5 százalékos fix és további 2 százalékos differenciált bérfejlesztést jelent.</li>
                     <li><strong>Egyszeri jutalom:</strong> 600.000 Ft egyszeri jutalom - A 2025. évi üzleti eredmények alapján minden aktív munkavállaló (a Leadership Squad tagok kivételével).</li>
                     <li><strong>TeleMix:</strong> Az éves cafeteria keret bruttó 700 000 Ft-ra nőtt.</li>
                     <li><strong>TEKE:</strong> A havi kedvezmény bruttó 45 000 Ft-ra emelkedett.</li>
@@ -691,636 +518,271 @@
                     <li><strong>Extrák:</strong> 3 hónapos Disney+ előfizetés. Téli olimpia aktivitás és nőnapi ajándékcsomagok.</li>
                 </ul>
             </div>
-            <button class="btn" id="btnRestart" onclick="restartGame()">🔄 Újra játszom</button>
+            <button class="btn" id="btnRestart">🔄 Új játék</button>
         </div>
     </div>
 
     <script>
         (function() {
-            // ==================== DOM ELEMEK ====================
+            // DOM elemek
             const startScreen = document.getElementById('startScreen');
             const gameScreen = document.getElementById('gameScreen');
             const endScreen = document.getElementById('endScreen');
             const gameArea = document.getElementById('gameArea');
             const crosshair = document.getElementById('crosshair');
-            const hudTimer = document.getElementById('hudTimer');
+            const hudStreak = document.getElementById('hudStreak');
             const hudScore = document.getElementById('hudScore');
-            const endScore = document.getElementById('endScore');
+            const endScoreSpan = document.getElementById('endScore');
             const btnStart = document.getElementById('btnStart');
             const btnRestart = document.getElementById('btnRestart');
 
-            // ==================== AUDIO RENDSZER ====================
+            // Audio
             let audioCtx = null;
-
             function initAudio() {
                 if (!audioCtx) {
-                    try {
-                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-                    } catch (e) {
-                        console.warn('AudioContext nem elérhető');
-                        return false;
-                    }
+                    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return false; }
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 return true;
             }
+            function playGunshot() { if(!audioCtx)return; try{ const duration=0.18, sampleRate=audioCtx.sampleRate, length=Math.floor(sampleRate*duration); const buffer=audioCtx.createBuffer(1,length,sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<length;i++){ const t=i/sampleRate, envelope=Math.exp(-t*30), noise=(Math.random()*2-1), lowFreq=Math.sin(2*Math.PI*80*t)*0.5; data[i]=(noise*0.7+lowFreq*0.3)*envelope*0.8;} const source=audioCtx.createBufferSource(); source.buffer=buffer; const filter=audioCtx.createBiquadFilter(); filter.type='lowpass'; filter.frequency.setValueAtTime(800,audioCtx.currentTime); filter.frequency.exponentialRampToValueAtTime(200,audioCtx.currentTime+duration); const gainNode=audioCtx.createGain(); gainNode.gain.setValueAtTime(0.9,audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration); source.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(); source.stop(audioCtx.currentTime+duration); }catch(e){} }
+            function playPop() { if(!audioCtx)return; try{ const duration=0.1, sampleRate=audioCtx.sampleRate, length=Math.floor(sampleRate*duration); const buffer=audioCtx.createBuffer(1,length,sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<length;i++){ const t=i/sampleRate, envelope=Math.exp(-t*50), noise=(Math.random()*2-1); data[i]=noise*envelope*0.7;} const source=audioCtx.createBufferSource(); source.buffer=buffer; const filter=audioCtx.createBiquadFilter(); filter.type='highpass'; filter.frequency.setValueAtTime(1200,audioCtx.currentTime); const gainNode=audioCtx.createGain(); gainNode.gain.setValueAtTime(0.8,audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration); source.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(); source.stop(audioCtx.currentTime+duration); }catch(e){} }
+            function playGoldenPop() { if(!audioCtx)return; try{ const duration=0.35, sampleRate=audioCtx.sampleRate, length=Math.floor(sampleRate*duration); const buffer=audioCtx.createBuffer(1,length,sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<length;i++){ const t=i/sampleRate, envelope=Math.exp(-t*8), tone=Math.sin(2*Math.PI*1600*t)*0.4+Math.sin(2*Math.PI*2400*t)*0.3; data[i]=tone*envelope*0.6;} const source=audioCtx.createBufferSource(); source.buffer=buffer; const gainNode=audioCtx.createGain(); gainNode.gain.setValueAtTime(0.7,audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration); source.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(audioCtx.currentTime+0.05); source.stop(audioCtx.currentTime+duration+0.05); }catch(e){} }
 
-            function playGunshot() {
-                if (!audioCtx) return;
-                try {
-                    const duration = 0.18;
-                    const sampleRate = audioCtx.sampleRate;
-                    const length = Math.floor(sampleRate * duration);
-                    const buffer = audioCtx.createBuffer(1, length, sampleRate);
-                    const data = buffer.getChannelData(0);
+            // Játék paraméterek – most KÜLÖN: sebesség gyorsan nő (1.25), spawn interval lassan csökken (0.92 => 8% csökkenés)
+            const BASE_SPAWN_INTERVAL = 1400;      // ms
+            const BASE_SPEED = 2.0;
+            const DIFFICULTY_INTERVAL = 10;        // másodperc
+            const SPEED_MULTIPLIER = 1.25;          // sebesség +25% / 10mp
+            const SPAWN_INTERVAL_FACTOR = 0.92;     // spawn intervallum szorzó (így 8%-kal csökken, nem 20%-kal)
 
-                    for (let i = 0; i < length; i++) {
-                        const t = i / sampleRate;
-                        const envelope = Math.exp(-t * 30);
-                        const noise = (Math.random() * 2 - 1);
-                        const lowFreq = Math.sin(2 * Math.PI * 80 * t) * 0.5;
-                        const mixed = noise * 0.7 + lowFreq * 0.3;
-                        data[i] = mixed * envelope * 0.8;
-                    }
+            const MIN_SPAWN_INTERVAL = 550;          // ne menjen 550ms alá, hogy ne legyen túl sok lufi
 
-                    const source = audioCtx.createBufferSource();
-                    source.buffer = buffer;
-                    const filter = audioCtx.createBiquadFilter();
-                    filter.type = 'lowpass';
-                    filter.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    filter.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + duration);
-                    const gainNode = audioCtx.createGain();
-                    gainNode.gain.setValueAtTime(0.9, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                    source.connect(filter);
-                    filter.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    source.start(audioCtx.currentTime);
-                    source.stop(audioCtx.currentTime + duration);
-                } catch (e) {
-                    // silent fail
-                }
-            }
-
-            function playPop() {
-                if (!audioCtx) return;
-                try {
-                    const duration = 0.1;
-                    const sampleRate = audioCtx.sampleRate;
-                    const length = Math.floor(sampleRate * duration);
-                    const buffer = audioCtx.createBuffer(1, length, sampleRate);
-                    const data = buffer.getChannelData(0);
-
-                    for (let i = 0; i < length; i++) {
-                        const t = i / sampleRate;
-                        const envelope = Math.exp(-t * 50);
-                        const noise = (Math.random() * 2 - 1);
-                        data[i] = noise * envelope * 0.7;
-                    }
-
-                    const source = audioCtx.createBufferSource();
-                    source.buffer = buffer;
-                    const filter = audioCtx.createBiquadFilter();
-                    filter.type = 'highpass';
-                    filter.frequency.setValueAtTime(1200, audioCtx.currentTime);
-                    const gainNode = audioCtx.createGain();
-                    gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                    source.connect(filter);
-                    filter.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    source.start(audioCtx.currentTime);
-                    source.stop(audioCtx.currentTime + duration);
-                } catch (e) {
-                    // silent fail
-                }
-            }
-
-            function playGoldenPop() {
-                if (!audioCtx) return;
-                try {
-                    // Extra csilingelő hang arany lufihoz
-                    const duration = 0.35;
-                    const sampleRate = audioCtx.sampleRate;
-                    const length = Math.floor(sampleRate * duration);
-                    const buffer = audioCtx.createBuffer(1, length, sampleRate);
-                    const data = buffer.getChannelData(0);
-                    for (let i = 0; i < length; i++) {
-                        const t = i / sampleRate;
-                        const envelope = Math.exp(-t * 8);
-                        const tone = Math.sin(2 * Math.PI * 1600 * t) * 0.4 + Math.sin(2 * Math.PI * 2400 * t) * 0.3;
-                        data[i] = tone * envelope * 0.6;
-                    }
-                    const source = audioCtx.createBufferSource();
-                    source.buffer = buffer;
-                    const gainNode = audioCtx.createGain();
-                    gainNode.gain.setValueAtTime(0.7, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                    source.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    source.start(audioCtx.currentTime + 0.05);
-                    source.stop(audioCtx.currentTime + duration + 0.05);
-                } catch (e) {
-                    // silent fail
-                }
-            }
-
-            // ==================== JÁTÉK ÁLLAPOT ====================
-            const GAME_DURATION = 60;
-            const BASE_SPAWN_INTERVAL = 1400; // ms
-            const BASE_SPEED = 2.0; // megnövelt alapsebesség (eredetileg 1.3)
-            const DIFFICULTY_INTERVAL = 10; // másodpercenként nő a nehézség
-            const DIFFICULTY_MULTIPLIER = 1.20; // 20% növekedés
-
-            // Az arany lufik üzenetei – garantáltan mind megjelenik, mielőtt ismétlődne
             const goldenMessagesPool = [
-                'Átlagosan 4,5 százalékos béremelés',
-                '600.000 Ft egyszeri jutalom',
-                'Emelkedett a Telemix',
-                'Emelkedett a TEKE',
-                'Új dolgozói mobil csomagok',
-                'Dupla szemüveg támogatás',
-                '3 hónapos Disney + előfizetés',
-                'Téli olimpia aktivitás',
+                'Átlagosan 4,5% béremelés', '600.000 Ft egyszeri jutalom', 'Emelkedett Telemix',
+                'Emelkedett TEKE', 'Új mobil csomagok', 'Dupla szemüveg támogatás',
+                '3 hónap Disney+', 'Téli olimpia aktivitás'
             ];
+            let messageQueue = [], messageIndex = 0;
+            function shuffleArray(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+            function getNextGoldenMessage() { if(messageQueue.length===0 || messageIndex>=messageQueue.length){ messageQueue=shuffleArray(goldenMessagesPool); messageIndex=0; } const msg=messageQueue[messageIndex]; messageIndex++; return msg; }
 
-            // A játék közben használt, kevert üzenetlista és index
-            let messageQueue = [];
-            let messageIndex = 0;
-
-            function shuffleArray(arr) {
-                const a = [...arr];
-                for (let i = a.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]];
-                }
-                return a;
-            }
-
-            function getNextGoldenMessage() {
-                // Ha üres a queue vagy a végére értünk, újrakeverjük
-                if (messageQueue.length === 0 || messageIndex >= messageQueue.length) {
-                    messageQueue = shuffleArray(goldenMessagesPool);
-                    messageIndex = 0;
-                }
-                const msg = messageQueue[messageIndex];
-                messageIndex++;
-                return msg;
-            }
-
+            // Játékállapot
             let gameState = {
                 running: false,
                 score: 0,
-                timeRemaining: GAME_DURATION,
+                magentaStreak: 0,
                 speedMultiplier: 1.0,
                 spawnIntervalMs: BASE_SPAWN_INTERVAL,
                 balloons: [],
                 spawnTimerId: null,
                 animFrameId: null,
                 difficultyTimerId: null,
-                gameTimerId: null,
             };
 
-            // ==================== SEGÉDFÜGGVÉNYEK ====================
             function switchScreen(showScreen) {
-                [startScreen, gameScreen, endScreen].forEach(s => {
-                    s.classList.remove('active');
-                    s.classList.add('hidden');
-                });
-                showScreen.classList.remove('hidden');
-                showScreen.classList.add('active');
+                [startScreen, gameScreen, endScreen].forEach(s => { s.classList.remove('active'); s.classList.add('hidden'); });
+                showScreen.classList.remove('hidden'); showScreen.classList.add('active');
+            }
+            function updateStreakDisplay() { hudStreak.innerHTML = ` Sorozat: ${gameState.magentaStreak} / 5`; if(gameState.magentaStreak>=5) hudStreak.style.color = "#FFD966"; else hudStreak.style.color = "#fff"; }
+            function updateScoreDisplay(flashClass) {
+                hudScore.textContent = gameState.score + ' pont';
+                if(flashClass) { hudScore.classList.add(flashClass); setTimeout(()=>hudScore.classList.remove(flashClass),250); }
             }
 
-            function getRandomArbitrary(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
-            // ==================== LUFI LÉTREHOZÁS ====================
-            function getBalloonType() {
-                const roll = Math.random();
-                if (roll < 0.10) return 'golden'; // 10%
-                if (roll < 0.30) return 'black'; // 20%
-                return 'magenta'; // 70%
-            }
-
+            function getBalloonType() { const r=Math.random(); if(r<0.10) return 'golden'; if(r<0.30) return 'black'; return 'magenta'; }
             function createBalloon() {
-                if (!gameState.running) return;
-
-                const gameAreaRect = gameArea.getBoundingClientRect();
-                const areaWidth = gameAreaRect.width;
-                const areaHeight = gameAreaRect.height;
-
-                const type = getBalloonType();
-                let balloonWidth, balloonHeight;
-                if (type === 'golden') {
-                    balloonWidth = areaWidth < 400 ? 40 : 65;
-                    balloonHeight = areaWidth < 400 ? 50 : 80;
-                } else {
-                    balloonWidth = areaWidth < 400 ? 34 : 55;
-                    balloonHeight = areaWidth < 400 ? 42 : 68;
-                }
-
-                const maxLeft = areaWidth - balloonWidth - 10;
-                const left = getRandomArbitrary(10, Math.max(15, maxLeft));
-                const startBottom = -(balloonHeight + getRandomArbitrary(10, 60));
-
-                const balloonEl = document.createElement('div');
-                balloonEl.className = `balloon ${type}`;
-                balloonEl.style.left = left + 'px';
-                balloonEl.style.bottom = startBottom + 'px';
-                balloonEl.style.width = balloonWidth + 'px';
-                balloonEl.style.height = balloonHeight + 'px';
-                balloonEl.innerHTML = `
-                    <div class="balloon-body" style="width:100%;height:100%;"></div>
-                    <div class="balloon-knot"></div>
-                `;
-                balloonEl.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (!gameState.running) return;
-                    popBalloon(balloonEl, type);
-                });
-                balloonEl.addEventListener('touchend', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    if (!gameState.running) return;
-                    popBalloon(balloonEl, type);
-                });
-
+                if(!gameState.running) return;
+                const rect=gameArea.getBoundingClientRect();
+                const w=rect.width, h=rect.height;
+                const type=getBalloonType();
+                let bw, bh;
+                if(type==='golden'){ bw=w<400?40:65; bh=w<400?50:80; }
+                else { bw=w<400?34:55; bh=w<400?42:68; }
+                const maxLeft=Math.max(10, w-bw-10);
+                const left=Math.random()*(maxLeft-10)+10;
+                const startBottom=-(bh+Math.random()*60);
+                const balloonEl=document.createElement('div');
+                balloonEl.className=`balloon ${type}`;
+                balloonEl.style.left=left+'px';
+                balloonEl.style.bottom=startBottom+'px';
+                balloonEl.style.width=bw+'px';
+                balloonEl.style.height=bh+'px';
+                balloonEl.innerHTML=`<div class="balloon-body" style="width:100%;height:100%;"></div><div class="balloon-knot"></div>`;
+                const handler=(e)=>{ e.stopPropagation(); if(gameState.running) popBalloon(balloonEl,type); };
+                balloonEl.addEventListener('click',handler);
+                balloonEl.addEventListener('touchend',handler);
                 gameArea.appendChild(balloonEl);
                 gameState.balloons.push({
-                    el: balloonEl,
-                    type: type,
-                    bottom: startBottom,
-                    speed: BASE_SPEED * gameState.speedMultiplier * getRandomArbitrary(0.85, 1.25),
-                    wobbleOffset: getRandomArbitrary(0, Math.PI * 2),
+                    el:balloonEl, type:type, bottom:startBottom,
+                    speed:BASE_SPEED*gameState.speedMultiplier*(Math.random()*0.4+0.85),
                 });
             }
 
             function popBalloon(balloonEl, type) {
-                if (!gameState.running) return;
-                if (balloonEl.dataset.popped === 'true') return;
-                balloonEl.dataset.popped = 'true';
-
-                const rect = balloonEl.getBoundingClientRect();
-                const gameAreaRect = gameArea.getBoundingClientRect();
-                const cx = rect.left + rect.width / 2 - gameAreaRect.left;
-                const cy = rect.top + rect.height / 2 - gameAreaRect.top;
-
-                // Hangok
-                playGunshot();
-                setTimeout(() => {
-                    if (type === 'golden') {
-                        playPop();
-                        playGoldenPop();
-                    } else {
-                        playPop();
-                    }
-                }, 40);
-
-                // Pontozás
-                let points = 0;
-                let flashClass = '';
-                if (type === 'magenta') {
-                    points = 5;
-                    flashClass = 'flash-positive';
-                } else if (type === 'golden') {
-                    points = 20;
-                    flashClass = 'flash-golden';
-                } else if (type === 'black') {
-                    points = -10;
-                    flashClass = 'flash-negative';
+                if(!gameState.running || balloonEl.dataset.popped==='true') return;
+                balloonEl.dataset.popped='true';
+                const rect=balloonEl.getBoundingClientRect();
+                const areaRect=gameArea.getBoundingClientRect();
+                const cx=rect.left+rect.width/2-areaRect.left;
+                const cy=rect.top+rect.height/2-areaRect.top;
+                playGunshot(); setTimeout(()=>{ if(type==='golden'){ playPop(); playGoldenPop(); } else playPop(); },40);
+                let points=0, flash='';
+                if(type==='magenta'){ points=5; flash='flash-positive'; }
+                else if(type==='golden'){ points=20; flash='flash-golden'; }
+                else if(type==='black'){ points=-10; flash='flash-negative'; }
+                gameState.score=Math.max(0, gameState.score+points);
+                updateScoreDisplay(flash);
+                if(type==='magenta') {
+                    gameState.magentaStreak=0;
+                    updateStreakDisplay();
                 }
-                gameState.score += points;
-                if (gameState.score < 0) gameState.score = 0;
-                updateScoreDisplay(flashClass);
-
                 // Részecskék
-                spawnParticles(cx, cy, type);
-
-                // Arany lufi üzenet – most a garantált sorrendből
-                if (type === 'golden') {
-                    const msg = getNextGoldenMessage();
-                    spawnGoldenMessage(cx, cy, msg);
+                const pCount=type==='golden'?14:7;
+                const baseColor=type==='magenta'?'#E20074':type==='golden'?'#FFD700':'#333';
+                for(let i=0;i<pCount;i++){
+                    const p=document.createElement('div'); p.className='particle';
+                    const sz=Math.random()*5+3; const ang=Math.random()*Math.PI*2; const dist=Math.random()*45+25;
+                    const px=Math.cos(ang)*dist, py=Math.sin(ang)*dist-Math.random()*20;
+                    p.style.cssText=`width:${sz}px;height:${sz}px;background:${baseColor};left:${cx}px;top:${cy}px;--px:${px}px;--py:${py}px;box-shadow:0 0 ${sz*2}px ${baseColor};`;
+                    gameArea.appendChild(p); setTimeout(()=>p.remove(),600);
                 }
-
-                // Lufi eltávolítása
+                if(type==='golden'){
+                    const msg=getNextGoldenMessage();
+                    const msgDiv=document.createElement('div'); msgDiv.className='golden-message';
+                    msgDiv.textContent='✨ '+msg+' ✨'; msgDiv.style.left=cx+'px'; msgDiv.style.top=cy+'px';
+                    msgDiv.style.transform='translate(-50%,-50%)';
+                    gameArea.appendChild(msgDiv); setTimeout(()=>msgDiv.remove(),2800);
+                }
                 removeBalloon(balloonEl);
             }
 
             function removeBalloon(balloonEl) {
-                const idx = gameState.balloons.findIndex(b => b.el === balloonEl);
-                if (idx >= 0) {
-                    gameState.balloons.splice(idx, 1);
-                }
-                if (balloonEl.parentNode) {
-                    balloonEl.remove();
-                }
+                const idx=gameState.balloons.findIndex(b=>b.el===balloonEl);
+                if(idx>=0) gameState.balloons.splice(idx,1);
+                if(balloonEl.parentNode) balloonEl.remove();
             }
 
-            function spawnParticles(cx, cy, type) {
-                const count = type === 'golden' ? 14 : 7;
-                const baseColor = type === 'magenta' ? '#E20074' :
-                    type === 'golden' ? '#FFD700' : '#333333';
-                const gameAreaRect = gameArea.getBoundingClientRect();
-
-                for (let i = 0; i < count; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    const size = getRandomArbitrary(3, 8);
-                    const angle = getRandomArbitrary(0, Math.PI * 2);
-                    const distance = getRandomArbitrary(25, 70);
-                    const px = Math.cos(angle) * distance;
-                    const py = Math.sin(angle) * distance - getRandomArbitrary(5, 25);
-                    particle.style.cssText = `
-                        width: ${size}px;
-                        height: ${size}px;
-                        background: ${baseColor};
-                        left: ${cx}px;
-                        top: ${cy}px;
-                        --px: ${px}px;
-                        --py: ${py}px;
-                        box-shadow: 0 0 ${size*2}px ${baseColor};
-                    `;
-                    gameArea.appendChild(particle);
-                    setTimeout(() => {
-                        if (particle.parentNode) particle.remove();
-                    }, 650);
-                }
-            }
-
-            function spawnGoldenMessage(cx, cy, msg) {
-                const msgEl = document.createElement('div');
-                msgEl.className = 'golden-message';
-                msgEl.textContent = '✨ ' + msg + ' ✨';
-                msgEl.style.left = cx + 'px';
-                msgEl.style.top = cy + 'px';
-                // Középre igazítás
-                msgEl.style.transform = 'translate(-50%, -50%)';
-                msgEl.style.animation = 'floatUpFade 2.8s ease-out forwards';
-                gameArea.appendChild(msgEl);
-                setTimeout(() => {
-                    if (msgEl.parentNode) msgEl.remove();
-                }, 2900);
-            }
-
-            function updateScoreDisplay(flashClass) {
-                hudScore.textContent = gameState.score + ' pont';
-                if (flashClass) {
-                    hudScore.classList.add(flashClass);
-                    setTimeout(() => {
-                        hudScore.classList.remove(flashClass);
-                    }, 250);
-                }
-            }
-
-            // ==================== JÁTÉK CIKLUS ====================
+            // GAMELOOP: mozgás és kihagyott lufik detektálása
             function gameLoop() {
-                if (!gameState.running) return;
-
-                const gameAreaRect = gameArea.getBoundingClientRect();
-                const areaHeight = gameAreaRect.height;
-
-                const balloonsToRemove = [];
-                gameState.balloons.forEach(b => {
-                    b.bottom += b.speed;
-                    b.el.style.bottom = b.bottom + 'px';
-                    if (b.bottom > areaHeight + 100) {
-                        balloonsToRemove.push(b.el);
+                if(!gameState.running) return;
+                const areaRect=gameArea.getBoundingClientRect();
+                const h=areaRect.height;
+                const toRemove=[];
+                for(let b of gameState.balloons){
+                    b.bottom+=b.speed;
+                    b.el.style.bottom=b.bottom+'px';
+                    if(b.bottom>h+100) toRemove.push(b);
+                }
+                for(let b of toRemove){
+                    if(b.type==='magenta'){
+                        gameState.magentaStreak++;
+                        updateStreakDisplay();
+                        if(gameState.magentaStreak>=5){
+                            endGame();
+                            return;
+                        }
                     }
-                });
-
-                balloonsToRemove.forEach(el => removeBalloon(el));
-
-                gameState.animFrameId = requestAnimationFrame(gameLoop);
+                    removeBalloon(b.el);
+                }
+                gameState.animFrameId=requestAnimationFrame(gameLoop);
             }
 
             function spawnLoop() {
-                if (!gameState.running) return;
+                if(!gameState.running) return;
                 createBalloon();
-                gameState.spawnTimerId = setTimeout(spawnLoop, gameState.spawnIntervalMs);
+                gameState.spawnTimerId=setTimeout(spawnLoop, gameState.spawnIntervalMs);
             }
 
+            // Nehézség növelés: sebesség nő SOKAT, spawn intervallum alig csökken
             function increaseDifficulty() {
-                if (!gameState.running) return;
-                gameState.speedMultiplier *= DIFFICULTY_MULTIPLIER;
-                gameState.spawnIntervalMs = Math.max(350, Math.floor(gameState.spawnIntervalMs / DIFFICULTY_MULTIPLIER));
-                // Újraindítjuk a spawn timert az új intervallummal
-                if (gameState.spawnTimerId) {
+                if(!gameState.running) return;
+                gameState.speedMultiplier *= SPEED_MULTIPLIER;
+                let newInterval = gameState.spawnIntervalMs * SPAWN_INTERVAL_FACTOR;
+                if(newInterval < MIN_SPAWN_INTERVAL) newInterval = MIN_SPAWN_INTERVAL;
+                gameState.spawnIntervalMs = newInterval;
+                if(gameState.spawnTimerId){
                     clearTimeout(gameState.spawnTimerId);
-                    gameState.spawnTimerId = setTimeout(spawnLoop, gameState.spawnIntervalMs);
+                    gameState.spawnTimerId=setTimeout(spawnLoop, gameState.spawnIntervalMs);
                 }
             }
 
-            function updateTimer() {
-                if (!gameState.running) return;
-                gameState.timeRemaining--;
-                hudTimer.textContent = gameState.timeRemaining;
-
-                if (gameState.timeRemaining <= 10) {
-                    hudTimer.classList.add('warning');
+            function startDifficultyTimer() {
+                if(gameState.difficultyTimerId) clearTimeout(gameState.difficultyTimerId);
+                function schedule() {
+                    if(!gameState.running) return;
+                    gameState.difficultyTimerId=setTimeout(()=>{
+                        increaseDifficulty();
+                        schedule();
+                    }, DIFFICULTY_INTERVAL*1000);
                 }
-
-                if (gameState.timeRemaining <= 0) {
-                    endGame();
-                    return;
-                }
-
-                // Nehézség növelése 10 másodpercenként (20%-kal)
-                const elapsed = GAME_DURATION - gameState.timeRemaining;
-                if (elapsed > 0 && elapsed % DIFFICULTY_INTERVAL === 0) {
-                    increaseDifficulty();
-                }
-
-                gameState.gameTimerId = setTimeout(updateTimer, 1000);
+                schedule();
             }
 
-            // ==================== JÁTÉK INDÍTÁS / LEÁLLÍTÁS ====================
+            function endGame() {
+                if(!gameState.running) return;
+                gameState.running=false;
+                if(gameState.spawnTimerId){ clearTimeout(gameState.spawnTimerId); gameState.spawnTimerId=null; }
+                if(gameState.difficultyTimerId){ clearTimeout(gameState.difficultyTimerId); gameState.difficultyTimerId=null; }
+                if(gameState.animFrameId){ cancelAnimationFrame(gameState.animFrameId); gameState.animFrameId=null; }
+                for(let b of gameState.balloons) { if(b.el&&b.el.parentNode) b.el.remove(); }
+                gameState.balloons=[];
+                gameArea.style.cursor='default'; document.body.style.cursor='default';
+                crosshair.style.display='none';
+                endScoreSpan.textContent=gameState.score;
+                switchScreen(endScreen);
+            }
+
             function startGame() {
-                initAudio();
-                // AudioContext feloldása user gesture-re
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-
-                // Üzenetlista alaphelyzetbe – véletlen sorrenddel indul
-                messageQueue = shuffleArray(goldenMessagesPool);
-                messageIndex = 0;
-
-                // Állapot reset
+                initAudio(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
                 gameState = {
                     running: true,
                     score: 0,
-                    timeRemaining: GAME_DURATION,
+                    magentaStreak: 0,
                     speedMultiplier: 1.0,
                     spawnIntervalMs: BASE_SPAWN_INTERVAL,
                     balloons: [],
                     spawnTimerId: null,
                     animFrameId: null,
                     difficultyTimerId: null,
-                    gameTimerId: null,
                 };
-
-                // UI reset
-                hudTimer.textContent = GAME_DURATION;
-                hudTimer.classList.remove('warning');
-                hudScore.textContent = '0 pont';
-                hudScore.classList.remove('flash-positive', 'flash-negative', 'flash-golden');
+                messageQueue = shuffleArray(goldenMessagesPool); messageIndex = 0;
                 gameArea.innerHTML = '';
+                hudScore.textContent = '0 pont'; hudScore.classList.remove('flash-positive','flash-negative','flash-golden');
+                updateStreakDisplay();
                 crosshair.style.display = 'block';
-
-                // Képernyő váltás
+                gameArea.style.cursor = 'none'; document.body.style.cursor = 'none';
                 switchScreen(gameScreen);
-
-                // Kurzor elrejtése a játéktéren
-                gameArea.style.cursor = 'none';
-                document.body.style.cursor = 'none';
-
-                // Játék ciklusok indítása
                 gameState.animFrameId = requestAnimationFrame(gameLoop);
                 gameState.spawnTimerId = setTimeout(spawnLoop, 300);
-                gameState.gameTimerId = setTimeout(updateTimer, 1000);
-
-                // Első lufi azonnal
-                setTimeout(() => {
-                    if (gameState.running) createBalloon();
-                }, 150);
-            }
-
-            function endGame() {
-                gameState.running = false;
-
-                // Takarítás
-                if (gameState.spawnTimerId) clearTimeout(gameState.spawnTimerId);
-                if (gameState.gameTimerId) clearTimeout(gameState.gameTimerId);
-                if (gameState.animFrameId) cancelAnimationFrame(gameState.animFrameId);
-
-                // Maradék lufik eltávolítása
-                gameState.balloons.forEach(b => {
-                    if (b.el.parentNode) b.el.remove();
-                });
-                gameState.balloons = [];
-                gameArea.innerHTML = '';
-
-                // Kurzor visszaállítása
-                gameArea.style.cursor = 'default';
-                document.body.style.cursor = 'default';
-                crosshair.style.display = 'none';
-                hudTimer.classList.remove('warning');
-
-                // Eredmény kijelzése
-                endScore.textContent = gameState.score;
-
-                // Képernyő váltás
-                switchScreen(endScreen);
+                startDifficultyTimer();
+                setTimeout(()=>{ if(gameState.running) createBalloon(); }, 120);
             }
 
             function restartGame() {
-                initAudio();
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                gameArea.innerHTML = '';
-                crosshair.style.display = 'none';
-                document.body.style.cursor = 'default';
-                gameArea.style.cursor = 'default';
+                initAudio(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
+                gameArea.innerHTML = ''; crosshair.style.display = 'none';
+                document.body.style.cursor = 'default'; gameArea.style.cursor = 'default';
                 switchScreen(startScreen);
             }
 
-            // ==================== EGÉR / ÉRINTÉS KEZELÉS ====================
-            function updateCrosshairPosition(x, y) {
-                crosshair.style.left = x + 'px';
-                crosshair.style.top = y + 'px';
-                crosshair.style.display = 'block';
-            }
+            // Célkereszt mozgatás
+            function updateCrosshair(x,y){ crosshair.style.left=x+'px'; crosshair.style.top=y+'px'; crosshair.style.display='block'; }
+            document.addEventListener('mousemove',(e)=>{ if(gameState.running) updateCrosshair(e.clientX,e.clientY); });
+            document.addEventListener('touchmove',(e)=>{ if(gameState.running&&e.touches[0]) updateCrosshair(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+            document.addEventListener('touchstart',(e)=>{ if(gameState.running&&e.touches[0]) updateCrosshair(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+            gameArea.addEventListener('click',(e)=>{ if(gameState.running&&(e.target===gameArea||e.target.classList.contains('game-area'))) playGunshot(); });
+            gameArea.addEventListener('touchend',(e)=>{ if(gameState.running&&(e.target===gameArea||e.target.classList.contains('game-area'))) playGunshot(); });
 
-            document.addEventListener('mousemove', function(e) {
-                if (!gameState.running) return;
-                updateCrosshairPosition(e.clientX, e.clientY);
-            });
-
-            document.addEventListener('touchmove', function(e) {
-                if (!gameState.running) return;
-                if (e.touches.length > 0) {
-                    updateCrosshairPosition(e.touches[0].clientX, e.touches[0].clientY);
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchstart', function(e) {
-                if (!gameState.running) return;
-                if (e.touches.length > 0) {
-                    updateCrosshairPosition(e.touches[0].clientX, e.touches[0].clientY);
-                }
-            }, { passive: true });
-
-            // Kattintás a játéktéren (mellélövés)
-            gameArea.addEventListener('click', function(e) {
-                if (!gameState.running) return;
-                // Ha nem lufin történt a kattintás (a lufi handler stopPropagation-t hív)
-                if (e.target === gameArea || e.target.classList.contains('game-area')) {
-                    playGunshot();
+            document.addEventListener('keydown',(e)=>{
+                if(e.code==='Space'||e.code==='Enter'){
+                    if(startScreen.classList.contains('active')){ e.preventDefault(); startGame(); }
+                    else if(endScreen.classList.contains('active')){ e.preventDefault(); restartGame(); }
                 }
             });
-
-            gameArea.addEventListener('touchend', function(e) {
-                if (!gameState.running) return;
-                if (e.target === gameArea || e.target.classList.contains('game-area')) {
-                    playGunshot();
-                }
-            });
-
-            // ==================== BILLENTYŰZET ====================
-            document.addEventListener('keydown', function(e) {
-                if (e.code === 'Space' || e.code === 'Enter') {
-                    if (startScreen.classList.contains('active')) {
-                        e.preventDefault();
-                        startGame();
-                    } else if (endScreen.classList.contains('active')) {
-                        e.preventDefault();
-                        restartGame();
-                    }
-                }
-            });
-
-            // ==================== ABLAK ÁTMÉRETEZÉS ====================
-            window.addEventListener('resize', function() {
-                if (!gameState.running) return;
-                // A lufik pozícióját a gameArea határain belül tartjuk
-                const gameAreaRect = gameArea.getBoundingClientRect();
-                const areaWidth = gameAreaRect.width;
-                gameState.balloons.forEach(b => {
-                    const elWidth = b.el.offsetWidth;
-                    const currentLeft = parseFloat(b.el.style.left) || 0;
-                    if (currentLeft + elWidth > areaWidth) {
-                        b.el.style.left = Math.max(5, areaWidth - elWidth - 10) + 'px';
-                    }
-                });
-            });
-
-            // ==================== INICIALIZÁLÁS ====================
-            function init() {
-                switchScreen(startScreen);
-                crosshair.style.display = 'none';
-                document.body.style.cursor = 'default';
-                gameArea.style.cursor = 'default';
-                gameArea.innerHTML = '';
-            }
-
-            // Gombok eseménykezelői
-            btnStart.addEventListener('click', startGame);
-            btnRestart.addEventListener('click', restartGame);
-
-            // Első interakcióra audio init
-            document.addEventListener('click', function audioUnlock() {
-                initAudio();
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-            }, { once: false });
-
-            init();
-            console.log('🎈 Pulzus-Lövölde - Gyorsabb lufik (BASE_SPEED=2.0)');
+            btnStart.addEventListener('click',startGame); btnRestart.addEventListener('click',restartGame);
+            document.addEventListener('click',()=>{ initAudio(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); }, {once:false});
+            switchScreen(startScreen); crosshair.style.display='none';
         })();
     </script>
 </body>
