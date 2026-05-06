@@ -431,46 +431,30 @@
             margin-bottom: 1.5rem;
             text-transform: uppercase;
         }
-        .success-summary {
+        .end-stats {
             background: var(--overlay-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.8rem;
-            text-align: left;
-            border: 1px solid rgba(226, 0, 116, 0.3);
+            border-radius: 20px;
+            padding: 0.8rem 1.2rem;
+            margin: 0.8rem 0 1.5rem;
             backdrop-filter: blur(8px);
-            max-height: 50vh;
-            overflow-y: auto;
+            border: 1px solid rgba(226, 0, 116, 0.4);
         }
-        .success-summary h3 {
-            color: var(--magenta-light);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            text-align: center;
+        .stat-item {
+            font-size: 1.2rem;
+            margin: 8px 0;
+            color: #ffdd99;
         }
-        .success-summary ul {
-            list-style: none;
-            padding: 0;
-        }
-        .success-summary li {
-            color: #e0e0e0;
-            padding: 7px 0 7px 24px;
-            position: relative;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .success-summary li::before {
-            content: '✦';
-            position: absolute;
-            left: 0;
-            top: 7px;
-            color: var(--magenta-light);
+        .stat-item span {
+            font-weight: bold;
+            color: white;
+            font-size: 1.3rem;
         }
         @media (max-width: 600px) {
             .balloon.magenta .balloon-body, .balloon.black .balloon-body { width: 42px; height: 52px; }
             .balloon.golden .balloon-body { width: 50px; height: 62px; }
             .crosshair { width: 36px; height: 36px; }
             .crosshair-ring { width: 10px; height: 10px; }
+            .stat-item { font-size: 1rem; }
         }
     </style>
 
@@ -519,19 +503,16 @@
         <div class="end-container">
             <div class="end-score-label">🎉 JÁTÉK VÉGE 🎉</div>
             <div class="end-score" id="endScore">0</div>
-            <div style="color:#ccc; margin-bottom:1.5rem;">Összpontszám</div>
-            <div class="success-summary">
-                <h3>🏆 Fejlődések 🏆</h3>
-                <ul>
-                    <li><strong>Béremelés:</strong>  2026. márciusáig visszamenőleg, differenciált módon, átlagosan 4,5 százalékos béremelést hajtottunk végre, amely 2,5 százalékos fix és további 2 százalékos differenciált bérfejlesztést jelent.</li>
-                    <li><strong>Egyszeri jutalom:</strong> 600.000 Ft egyszeri jutalom - A 2025. évi üzleti eredmények alapján minden aktív munkavállaló (a Leadership Squad tagok kivételével).</li>
-                    <li><strong>TeleMix:</strong> Az éves cafeteria keret bruttó 700 000 Ft-ra nőtt.</li>
-                    <li><strong>TEKE:</strong> A havi kedvezmény bruttó 45 000 Ft-ra emelkedett.</li>
-                    <li><strong>Mobil:</strong> Kedvezőbb dolgozói családi mobilcsomagok.</li>
-                    <li><strong>Szemüveg:</strong> Megduplázott szemüvegtámogatási összeg.</li>
-                    <li><strong>Extrák:</strong> 3 hónapos Disney+ előfizetés. Téli olimpia aktivitás és nőnapi ajándékcsomagok.</li>
-                </ul>
+            <div style="color:#ccc; margin-bottom:0.5rem;">Összpontszám</div>
+            
+            <!-- ★ Fekete lufi találat számláló (pontszám alá) ★ -->
+            <div class="end-stats">
+                <div class="stat-item">🖤 Fekete lufi találat: <span id="blackHitDisplay">0</span></div>
+                <div class="stat-item">⏱️ Játékidő: <span id="timeDisplay">0</span> másodperc</div>
             </div>
+
+            <!-- A "Fejlődések" szöveg és az alatta lévő felsorolás TÖRÖLVE -->
+
             <button class="btn" id="btnRestart">🔄 Új játék</button>
         </div>
     </div>
@@ -547,6 +528,8 @@
             const hudStreak = document.getElementById('hudStreak');
             const hudScore = document.getElementById('hudScore');
             const endScoreSpan = document.getElementById('endScore');
+            const blackHitDisplaySpan = document.getElementById('blackHitDisplay');
+            const timeDisplaySpan = document.getElementById('timeDisplay');
             const btnStart = document.getElementById('btnStart');
             const btnRestart = document.getElementById('btnRestart');
 
@@ -563,14 +546,13 @@
             function playPop() { if(!audioCtx)return; try{ const duration=0.1, sampleRate=audioCtx.sampleRate, length=Math.floor(sampleRate*duration); const buffer=audioCtx.createBuffer(1,length,sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<length;i++){ const t=i/sampleRate, envelope=Math.exp(-t*50), noise=(Math.random()*2-1); data[i]=noise*envelope*0.7;} const source=audioCtx.createBufferSource(); source.buffer=buffer; const filter=audioCtx.createBiquadFilter(); filter.type='highpass'; filter.frequency.setValueAtTime(1200,audioCtx.currentTime); const gainNode=audioCtx.createGain(); gainNode.gain.setValueAtTime(0.8,audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration); source.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(); source.stop(audioCtx.currentTime+duration); }catch(e){} }
             function playGoldenPop() { if(!audioCtx)return; try{ const duration=0.35, sampleRate=audioCtx.sampleRate, length=Math.floor(sampleRate*duration); const buffer=audioCtx.createBuffer(1,length,sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<length;i++){ const t=i/sampleRate, envelope=Math.exp(-t*8), tone=Math.sin(2*Math.PI*1600*t)*0.4+Math.sin(2*Math.PI*2400*t)*0.3; data[i]=tone*envelope*0.6;} const source=audioCtx.createBufferSource(); source.buffer=buffer; const gainNode=audioCtx.createGain(); gainNode.gain.setValueAtTime(0.7,audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration); source.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(audioCtx.currentTime+0.05); source.stop(audioCtx.currentTime+duration+0.05); }catch(e){} }
 
-            // Játék paraméterek – most KÜLÖN: sebesség gyorsan nő (1.25), spawn interval lassan csökken (0.92 => 8% csökkenés)
-            const BASE_SPAWN_INTERVAL = 1400;      // ms
+            // Játék paraméterek
+            const BASE_SPAWN_INTERVAL = 1400;
             const BASE_SPEED = 2.0;
-            const DIFFICULTY_INTERVAL = 10;        // másodperc
-            const SPEED_MULTIPLIER = 1.25;          // sebesség +25% / 10mp
-            const SPAWN_INTERVAL_FACTOR = 0.92;     // spawn intervallum szorzó (így 8%-kal csökken, nem 20%-kal)
-
-            const MIN_SPAWN_INTERVAL = 550;          // ne menjen 550ms alá, hogy ne legyen túl sok lufi
+            const DIFFICULTY_INTERVAL = 10;
+            const SPEED_MULTIPLIER = 1.25;
+            const SPAWN_INTERVAL_FACTOR = 0.92;
+            const MIN_SPAWN_INTERVAL = 550;
 
             const goldenMessagesPool = [
                 'Béremelés', '600 eFt jutalom', 'Több Telemix',
@@ -581,11 +563,13 @@
             function shuffleArray(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
             function getNextGoldenMessage() { if(messageQueue.length===0 || messageIndex>=messageQueue.length){ messageQueue=shuffleArray(goldenMessagesPool); messageIndex=0; } const msg=messageQueue[messageIndex]; messageIndex++; return msg; }
 
-            // Játékállapot
+            // Játékállapot (kibővítve: blackHitCount, startTime)
             let gameState = {
                 running: false,
                 score: 0,
                 magentaStreak: 0,
+                blackHitCount: 0,
+                startTime: 0,
                 speedMultiplier: 1.0,
                 spawnIntervalMs: BASE_SPAWN_INTERVAL,
                 balloons: [],
@@ -633,6 +617,7 @@
                 });
             }
 
+            // ★ Fekete lufi találat számláló bővítés
             function popBalloon(balloonEl, type) {
                 if(!gameState.running || balloonEl.dataset.popped==='true') return;
                 balloonEl.dataset.popped='true';
@@ -644,7 +629,11 @@
                 let points=0, flash='';
                 if(type==='magenta'){ points=5; flash='flash-positive'; }
                 else if(type==='golden'){ points=20; flash='flash-golden'; }
-                else if(type==='black'){ points=-10; flash='flash-negative'; }
+                else if(type==='black'){ 
+                    points=-10; 
+                    flash='flash-negative';
+                    gameState.blackHitCount++;   // ★ fekete lufi találat növelése
+                }
                 gameState.score=Math.max(0, gameState.score+points);
                 updateScoreDisplay(flash);
                 if(type==='magenta') {
@@ -677,7 +666,6 @@
                 if(balloonEl.parentNode) balloonEl.remove();
             }
 
-            // GAMELOOP: mozgás és kihagyott lufik detektálása
             function gameLoop() {
                 if(!gameState.running) return;
                 const areaRect=gameArea.getBoundingClientRect();
@@ -708,7 +696,6 @@
                 gameState.spawnTimerId=setTimeout(spawnLoop, gameState.spawnIntervalMs);
             }
 
-            // Nehézség növelés: sebesség nő SOKAT, spawn intervallum alig csökken
             function increaseDifficulty() {
                 if(!gameState.running) return;
                 gameState.speedMultiplier *= SPEED_MULTIPLIER;
@@ -733,6 +720,7 @@
                 schedule();
             }
 
+            // ★ Vége: megjelenítjük a fekete találatokat és az eltelt időt
             function endGame() {
                 if(!gameState.running) return;
                 gameState.running=false;
@@ -743,16 +731,25 @@
                 gameState.balloons=[];
                 gameArea.style.cursor='default'; document.body.style.cursor='default';
                 crosshair.style.display='none';
-                endScoreSpan.textContent=gameState.score;
+                
+                // Záróképernyő adatok frissítése
+                endScoreSpan.textContent = gameState.score;
+                blackHitDisplaySpan.textContent = gameState.blackHitCount;
+                const elapsedSeconds = Math.floor((performance.now() - gameState.startTime) / 1000);
+                timeDisplaySpan.textContent = elapsedSeconds;
+                
                 switchScreen(endScreen);
             }
 
             function startGame() {
                 initAudio(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
+                // Új állapot, blackHitCount és startTime alaphelyzet
                 gameState = {
                     running: true,
                     score: 0,
                     magentaStreak: 0,
+                    blackHitCount: 0,
+                    startTime: performance.now(),   // ★ időmérés indul
                     speedMultiplier: 1.0,
                     spawnIntervalMs: BASE_SPAWN_INTERVAL,
                     balloons: [],
@@ -780,7 +777,7 @@
                 switchScreen(startScreen);
             }
 
-            // Célkereszt mozgatás
+            // Célkereszt mozgatás (módosítatlan)
             function updateCrosshair(x,y){ crosshair.style.left=x+'px'; crosshair.style.top=y+'px'; crosshair.style.display='block'; }
             document.addEventListener('mousemove',(e)=>{ if(gameState.running) updateCrosshair(e.clientX,e.clientY); });
             document.addEventListener('touchmove',(e)=>{ if(gameState.running&&e.touches[0]) updateCrosshair(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
